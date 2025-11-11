@@ -1,53 +1,55 @@
-// src/components/JobCard.jsx
-import { Link } from 'react-router';
-import { FaTag, FaCalendarAlt, FaInfoCircle } from 'react-icons/fa';
+import { Link } from "react-router-dom";
 
-const JobCard = ({ job }) => {
-    const { _id, title, category, summary, coverImage, postedDateTime } = job;
-    
-    // Format the date for better readability
-    const formattedDate = new Date(postedDateTime).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-
-    return (
-        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border">
-            <img src={coverImage} alt={title} className="w-full h-48 object-cover" />
-            <div className="p-5 space-y-3">
-                
-                <div className="flex items-center justify-between text-sm text-gray-600">
-                    <span className="flex items-center space-x-1">
-                        <FaTag className="text-blue-500" />
-                        <span className="font-semibold text-blue-800">{category}</span>
-                    </span>
-                    <span className="flex items-center space-x-1">
-                        <FaCalendarAlt className="text-gray-500" />
-                        <span>Posted: {formattedDate}</span>
-                    </span>
-                </div>
-
-                <h3 className="text-xl font-bold text-gray-800 h-14 overflow-hidden">
-                    {title}
-                </h3>
-                
-                <p className="text-gray-600 text-sm h-16 overflow-hidden">
-                    {summary.substring(0, 100)}...
-                </p>
-
-                <div className="pt-2">
-                    <Link 
-                        to={`/job/${_id}`} 
-                        className="flex items-center justify-center space-x-2 w-full py-2 font-semibold rounded-md bg-green-500 text-white hover:bg-green-600 transition duration-200"
-                    >
-                        <FaInfoCircle />
-                        <span>View Details</span>
-                    </Link>
-                </div>
-            </div>
+function JobCard({ job }) {
+  return (
+    <Link to={`/allJobs/${job._id}`}>
+      <div className="group overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-blue-300 h-full flex flex-col">
+        {/* Cover Image */}
+        <div className="overflow-hidden bg-gray-100 h-48">
+          <img
+            src={job.coverImage}
+            alt={job.title}
+            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+          />
         </div>
-    );
-};
+
+        {/* Content */}
+        <div className="flex flex-col gap-3 p-4 flex-1">
+          {/* Category Badge */}
+          <div className="inline-flex w-fit">
+            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+              {job.category}
+            </span>
+          </div>
+
+          {/* Title */}
+          <h3 className="line-clamp-2 font-heading text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+            {job.title}
+          </h3>
+
+          {/* Posted By */}
+          <p className="text-sm font-medium text-gray-700">
+            by <span className="text-blue-600">{job.postedBy}</span>
+          </p>
+
+          {/* Summary */}
+          <p className="line-clamp-2 text-sm text-gray-600 flex-1">
+            {job.summary}
+          </p>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+            <span className="text-xs text-gray-500">
+              {job.postedDate}
+            </span>
+            <button className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-700">
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 export default JobCard;

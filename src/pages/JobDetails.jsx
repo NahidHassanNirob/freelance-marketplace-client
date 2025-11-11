@@ -1,134 +1,214 @@
-// src/pages/JobDetails.jsx
-import { useParams, useNavigate } from 'react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import useAxiosSecure from '../hooks/useAxiosSecure';
-import useAuth from '../hooks/useAuth';
-import { ImSpinner9 } from 'react-icons/im';
-import { toast } from 'react-hot-toast';
-import { FaUserCircle, FaEnvelope, FaTag } from 'react-icons/fa';
+import { useParams, useNavigate } from "react-router-dom";
+import { mockJobs } from "../data/mockJobs.jsx";
+import Navbar from "../components/Navbar.jsx";
+import Footer from "../components/Footer.jsx";
+import { useAuth } from "../hooks/index.jsx";
+import { useJobStore } from "../store/index.jsx";
+import toast from "react-hot-toast";
+import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 
-const JobDetails = () => {
-    const { id } = useParams();
-    const { user } = useAuth();
-    const axiosSecure = useAxiosSecure();
-    const navigate = useNavigate();
+function JobDetails() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { acceptedTasks, addAcceptedTask } = useJobStore();
 
-    // TanStack Query to fetch single job details
-    const { data: job = {}, isLoading } = useQuery({
-        queryKey: ['jobDetails', id],
-        queryFn: async () => {
-            const res = await axiosSecure.get(`/jobs/${id}`);
-            return res.data;
-        },
-        enabled: !!id, // Only run query if id exists
-    });
+  const job = mockJobs.find((j) => j._id === id);
 
-    // TanStack Mutation for accepting the job
-    const acceptJobMutation = useMutation({
-        mutationFn: (acceptedTask) => {
-            return axiosSecure.post('/accepted-tasks', acceptedTask);
-        },
-        onSuccess: () => {
-            toast.success('Job accepted successfully!');
-            // After accepting, you might want to invalidate the 'myAcceptedTasks' query
-            // queryClient.invalidateQueries({ queryKey: ['myAcceptedTasks', user?.email] }); 
-            navigate('/my-accepted-tasks'); 
-        },
-        onError: (error) => {
-            console.error('Accept Job Error:', error.response?.data || error.message);
-            const message = error.response?.data?.message || 'Failed to accept job.';
-            toast.error(message);
-        },
-    });
-
-    const handleAcceptJob = (e) => {
-        e.preventDefault();
-        
-        // --- CHALLENGE 3: LOGIC CHECK ---
-        if (user.email === job.userEmail) {
-            toast.error('You cannot accept your own posted job.');
-            return;
-        }
-        
-        const acceptedTask = {
-            jobId: job._id,
-            title: job.title,
-            category: job.category,
-            jobPosterEmail: job.userEmail,
-            acceptedByEmail: user.email,
-            acceptedByName: user.displayName,
-            acceptedDateTime: new Date().toISOString(),
-            status: 'Pending', // Initial status when accepted
-        };
-
-        acceptJobMutation.mutate(acceptedTask);
-    };
-
-    if (isLoading) {
-        return <div className="flex justify-center items-center min-h-[calc(100vh-120px)]"><ImSpinner9 className="text-6xl text-blue-500 animate-spin" /></div>;
-    }
-    
-    if (!job._id) {
-        return <div className="text-center text-red-500 py-10">Job not found.</div>;
-    }
-
-    const isPoster = user?.email === job.userEmail;
-
+  if (!job) {
     return (
-        <div className="py-10">
-            <div className="max-w-6xl mx-auto p-8 border rounded-xl shadow-2xl bg-white grid lg:grid-cols-3 gap-10">
-                
-                {/* Job Info (Left/Main Section) */}
-                <div className="lg:col-span-2 space-y-6">
-                    <img src={job.coverImage} alt={job.title} className="w-full h-80 object-cover rounded-xl shadow-md" />
-                    <h1 className="text-4xl font-extrabold text-gray-800">{job.title}</h1>
-                    <div className="flex items-center space-x-4 text-lg font-medium text-gray-600">
-                        <span className="flex items-center"><FaTag className="mr-2 text-blue-600" /> {job.category}</span>
-                    </div>
-
-                    <p className="text-lg leading-relaxed text-gray-700">{job.summary}</p>
-                    
-                    <hr className="my-6" />
-
-                    <h3 className="text-2xl font-bold mb-4">Posted By</h3>
-                    <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                        <FaUserCircle className="text-4xl text-blue-600" />
-                        <div>
-                            <p className="font-bold">{job.postedBy}</p>
-                            <p className="text-sm text-gray-500 flex items-center"><FaEnvelope className="mr-1" /> {job.userEmail}</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Accept/Bid Form (Right Section) */}
-                <div className="lg:col-span-1 p-6 border rounded-xl shadow-lg bg-blue-50 h-fit">
-                    <h3 className="text-2xl font-bold text-blue-800 mb-6">Accept This Job</h3>
-
-                    {isPoster ? (
-                        <p className="text-red-500 font-semibold text-center py-4">
-                            You posted this job. You cannot accept it.
-                        </p>
-                    ) : (
-                        <form onSubmit={handleAcceptJob} className="space-y-4">
-                            <p className="text-sm text-gray-600">
-                                Click the button below to confirm you are taking on this task.
-                            </p>
-
-                            <div className="pt-4">
-                                <button
-                                    type="submit"
-                                    className="w-full py-3 font-semibold rounded-md bg-blue-600 text-white hover:bg-blue-700 transition duration-200 disabled:bg-gray-400"
-                                    disabled={acceptJobMutation.isLoading || isPoster}
-                                >
-                                    {acceptJobMutation.isLoading ? 'Accepting...' : 'Confirm Acceptance'}
-                                </button>
-                            </div>
-                        </form>
-                    )}
-                </div>
-            </div>
-        </div>
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center bg-gray-50">
+          <div className="text-center space-y-4">
+            <h1 className="text-3xl font-bold text-gray-900">Job Not Found</h1>
+            <button
+              onClick={() => navigate("/allJobs")}
+              className="inline-block rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white hover:bg-blue-700"
+            >
+              Back to Jobs
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </div>
     );
-};
+  }
+
+  const isAccepted = acceptedTasks.some((task) => task.jobId === job._id);
+  const isOwn = user?.email === job.userEmail;
+
+  const handleAccept = () => {
+    if (!user) {
+      toast.error("Please log in to accept this job");
+      navigate("/login");
+      return;
+    }
+
+    if (isOwn) {
+      toast.error("You cannot accept your own job");
+      return;
+    }
+
+    if (isAccepted) {
+      toast.error("You have already accepted this job");
+      return;
+    }
+
+    addAcceptedTask(job._id);
+    toast.success("Job accepted successfully!");
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.6 },
+    },
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
+
+      <main className="flex-1 bg-gray-50 py-12 sm:py-16">
+        <motion.div
+          className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          {/* Back Button */}
+          <button
+            onClick={() => navigate("/allJobs")}
+            className="mb-6 flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold"
+          >
+            <ArrowLeft size={20} />
+            Back to Jobs
+          </button>
+
+          <div className="rounded-lg bg-white p-8 shadow-md">
+            {/* Cover Image */}
+            <div className="mb-8 overflow-hidden rounded-lg bg-gray-100">
+              <img
+                src={job.coverImage}
+                alt={job.title}
+                className="h-96 w-full object-cover"
+              />
+            </div>
+
+            {/* Content */}
+            <div className="space-y-6">
+              {/* Header */}
+              <div className="space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h1 className="font-heading text-4xl font-bold text-gray-900 mb-2">
+                      {job.title}
+                    </h1>
+                    <div className="flex items-center gap-4">
+                      <span className="inline-block rounded-full bg-blue-100 px-4 py-1 text-sm font-semibold text-blue-700">
+                        {job.category}
+                      </span>
+                      <span className="text-sm text-gray-600">{job.postedDate}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Posted By */}
+                <div className="border-t border-gray-200 pt-4">
+                  <p className="text-sm text-gray-600 mb-2">Posted by</p>
+                  <p className="font-heading text-xl font-semibold text-gray-900">
+                    {job.postedBy}
+                  </p>
+                  <p className="text-sm text-gray-600">{job.userEmail}</p>
+                </div>
+              </div>
+
+              {/* Status */}
+              {isAccepted && (
+                <div className="rounded-lg bg-green-50 border border-green-200 p-4">
+                  <p className="text-sm font-semibold text-green-700">✓ You have accepted this job</p>
+                </div>
+              )}
+
+              {isOwn && (
+                <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
+                  <p className="text-sm font-semibold text-amber-700">This is your job posting</p>
+                </div>
+              )}
+
+              {/* Summary */}
+              <div className="space-y-4">
+                <h2 className="font-heading text-2xl font-bold text-gray-900">Job Description</h2>
+                <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {job.summary}
+                </p>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                <div className="rounded-lg bg-gray-50 p-4">
+                  <p className="text-sm text-gray-600 mb-1">Category</p>
+                  <p className="font-semibold text-gray-900">{job.category}</p>
+                </div>
+                <div className="rounded-lg bg-gray-50 p-4">
+                  <p className="text-sm text-gray-600 mb-1">Posted</p>
+                  <p className="font-semibold text-gray-900">{job.postedDate}</p>
+                </div>
+                <div className="rounded-lg bg-gray-50 p-4">
+                  <p className="text-sm text-gray-600 mb-1">Posted At</p>
+                  <p className="font-semibold text-gray-900">{job.postedTime}</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="border-t border-gray-200 pt-6 flex gap-4">
+                {!isOwn && !isAccepted && (
+                  <button
+                    onClick={handleAccept}
+                    className="flex-1 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-green-700"
+                  >
+                    Accept This Job
+                  </button>
+                )}
+
+                {isOwn && (
+                  <div className="flex gap-3 w-full">
+                    <button
+                      onClick={() => navigate(`/updateJob/${job._id}`)}
+                      className="flex-1 rounded-lg bg-amber-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-amber-700"
+                    >
+                      Edit Job
+                    </button>
+                    <button
+                      onClick={() => {
+                        toast.success("Job deleted successfully");
+                        navigate("/allJobs");
+                      }}
+                      className="flex-1 rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-700"
+                    >
+                      Delete Job
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => navigate("/allJobs")}
+                  className="flex-1 rounded-lg border border-gray-300 px-6 py-3 font-semibold text-gray-900 transition-colors hover:bg-gray-50"
+                >
+                  Browse More Jobs
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
 
 export default JobDetails;

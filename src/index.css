@@ -1,2 +1,53 @@
-@import "tailwindcss";
-@plugin "daisyui";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+:root {
+  color-scheme: light;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("./assets/fonts/76d2ee8fca824559a1184bd2b25a6a43.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("./assets/fonts/b07d0fa3d2fd43b98006689addc677ca.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("./assets/fonts/8bd842785d73477db132731bff211765.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+a {
+  text-decoration: none;
+}
+
+@layer components {
+  .font-heading {
+    @apply font-sans;
+  }
+}

@@ -1,92 +1,190 @@
-// src/pages/AddJob.jsx
-import useAuth from '../hooks/useAuth';
-import useAxiosSecure from '../hooks/useAxiosSecure';
-import { toast } from 'react-hot-toast';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/index.jsx";
+import toast from "react-hot-toast";
+import Navbar from "../components/Navbar.jsx";
+import Footer from "../components/Footer.jsx";
+import { jobCategories } from "../data/mockJobs.jsx";
+import { motion } from "framer-motion";
 
-const categories = ['Web Development', 'Digital Marketing', 'Graphics Designing', 'Content Writing'];
+function AddJob() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    category: jobCategories[0].name,
+    summary: "",
+    coverImage: "",
+  });
 
-const AddJob = () => {
-    const { user } = useAuth();
-    const axiosSecure = useAxiosSecure();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    const handleAddJob = async (e) => {
-        e.preventDefault();
-        const form = e.target;
-        const jobData = {
-            title: form.title.value,
-            postedBy: user?.displayName, // Filled from logged-in user
-            category: form.category.value,
-            summary: form.summary.value,
-            coverImage: form.coverImage.value,
-            userEmail: user?.email, // Filled from logged-in user
-        };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        try {
-            // POST request using Axios Secure (sends JWT token automatically)
-            const res = await axiosSecure.post('/jobs', jobData);
+    if (!formData.title || !formData.category || !formData.summary || !formData.coverImage) {
+      toast.error("Please fill in all fields");
+      return;
+    }
 
-            if (res.data.success) {
-                toast.success('Job added successfully!');
-                form.reset(); // Clear form after success
-            }
-        } catch (error) {
-            console.error('Error adding job:', error.response?.data || error.message);
-            toast.error('Failed to add job. Please try again.');
-        }
-    };
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      
+      toast.success("Job posted successfully!");
+      navigate("/allJobs");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to post job");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return (
-        <div className="py-10">
-            <h2 className="text-3xl font-bold text-center mb-6">Add a New Job/Task</h2>
-            
-            <form onSubmit={handleAddJob} className="max-w-3xl mx-auto p-8 border rounded-xl shadow-lg bg-white">
-                
-                {/* Row 1: Title and Category */}
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label className="block text-sm font-bold mb-2">Job Title</label>
-                        <input type="text" name="title" placeholder="e.g., Senior React Developer" required className="w-full px-4 py-3 rounded-md border" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold mb-2">Category (Dropdown)</label>
-                        <select name="category" required className="w-full px-4 py-3 rounded-md border">
-                            <option value="">Select Category</option>
-                            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                        </select>
-                    </div>
-                </div>
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6 },
+    },
+  };
 
-                {/* Row 2: Posted By and User Email (Readonly) */}
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label className="block text-sm font-bold mb-2">Posted By (Readonly)</label>
-                        <input type="text" name="postedBy" defaultValue={user?.displayName || ''} readOnly className="w-full px-4 py-3 rounded-md border bg-gray-100" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-bold mb-2">User Email (Readonly)</label>
-                        <input type="email" name="userEmail" defaultValue={user?.email || ''} readOnly className="w-full px-4 py-3 rounded-md border bg-gray-100" />
-                    </div>
-                </div>
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
 
-                {/* Row 3: Cover Image URL */}
-                <div className="mb-6">
-                    <label className="block text-sm font-bold mb-2">Cover Image URL</label>
-                    <input type="url" name="coverImage" placeholder="Image URL (imgbb)" required className="w-full px-4 py-3 rounded-md border" />
-                </div>
+      <main className="flex-1 bg-gray-50 py-12 sm:py-16">
+        <motion.div
+          className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <div className="rounded-lg bg-white p-8 shadow-md">
+            {/* Header */}
+            <div className="space-y-2 mb-8">
+              <h1 className="font-heading text-3xl font-bold text-gray-900">Post a New Job</h1>
+              <p className="text-gray-600">
+                Share your project with talented freelancers on FreelanceHub
+              </p>
+            </div>
 
-                {/* Row 4: Summary/Description (Text Area) */}
-                <div className="mb-6">
-                    <label className="block text-sm font-bold mb-2">Summary/Short Description</label>
-                    <textarea name="summary" rows="4" placeholder="Briefly describe the job requirements and tasks..." required className="w-full px-4 py-3 rounded-md border"></textarea>
-                </div>
-                
-                {/* Submit Button */}
-                <button type="submit" className="w-full py-3 font-semibold rounded-md bg-green-600 text-white hover:bg-green-700 transition duration-200">
-                    Post Job
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Job Title *
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 transition-colors hover:border-gray-400 focus:border-blue-500 focus:outline-none"
+                  placeholder="e.g., Build React Landing Page"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Posted By
+                </label>
+                <input
+                  type="text"
+                  value={user?.displayName || ""}
+                  disabled
+                  className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category *
+                </label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 transition-colors hover:border-gray-400 focus:border-blue-500 focus:outline-none"
+                >
+                  {jobCategories.map((cat) => (
+                    <option key={cat.name} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Job Summary *
+                </label>
+                <textarea
+                  name="summary"
+                  value={formData.summary}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 transition-colors hover:border-gray-400 focus:border-blue-500 focus:outline-none"
+                  placeholder="Describe your project, requirements, and deliverables..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cover Image URL *
+                </label>
+                <input
+                  type="url"
+                  name="coverImage"
+                  value={formData.coverImage}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 transition-colors hover:border-gray-400 focus:border-blue-500 focus:outline-none"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Email
+                </label>
+                <input
+                  type="email"
+                  value={user?.email || ""}
+                  disabled
+                  className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-500"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? "Posting..." : "Post Job"}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/allJobs")}
+                  className="flex-1 rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-900 transition-colors hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              </div>
             </form>
-        </div>
-    );
-};
+          </div>
+        </motion.div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
 
 export default AddJob;

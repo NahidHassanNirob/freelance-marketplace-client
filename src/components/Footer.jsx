@@ -1,28 +1,100 @@
-// client/src/components/Footer.jsx
+import { Link } from "react-router-dom";
 
-import React from 'react';
+function Footer() {
+  const currentYear = new Date().getFullYear();
 
-const Footer = () => {
-    return (
-        <footer className="footer footer-center p-10 bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-t dark:border-gray-700 mt-10">
-            <aside>
-                <p className="font-bold text-lg text-indigo-600 dark:text-indigo-400">
-                    FreelanceHub
-                </p> 
-                <p className="text-sm">
-                    ফ্রিল্যান্স জব পোস্টিং ও বিডিং প্ল্যাটফর্ম।
-                    <br/>সর্বস্বত্ব সংরক্ষিত © {new Date().getFullYear()}
-                </p>
-            </aside>
-            <nav>
-                <div className="grid grid-flow-col gap-4">
-                    <a className="link link-hover">যোগাযোগ</a>
-                    <a className="link link-hover">গোপনীয়তা নীতি</a>
-                    <a className="link link-hover">শর্তাবলী</a>
-                </div>
-            </nav>
-        </footer>
-    );
-};
+  return (
+    <footer className="border-t border-gray-200 bg-gray-50 py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+          {/* Brand */}
+          <div>
+            <div className="flex items-center gap-2 font-heading text-xl font-bold text-blue-600 mb-4">
+              <span className="text-2xl">💼</span>
+              <span>FreelanceHub</span>
+            </div>
+            <p className="text-sm text-gray-600">
+              Connecting talented freelancers with great opportunities.
+            </p>
+          </div>
+
+          {/* Navigation */}
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-4">Platform</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link to="/allJobs" className="text-gray-600 hover:text-blue-600 transition-colors">
+                  All Jobs
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" className="text-gray-600 hover:text-blue-600 transition-colors">
+                  Login
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Resources */}
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-4">Resources</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
+                  How it Works
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
+                  FAQ
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
+                  Contact
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-4">Contact</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="mailto:hello@freelancehub.com" className="text-gray-600 hover:text-blue-600 transition-colors">
+                  hello@freelancehub.com
+                </a>
+              </li>
+              <li className="text-gray-600">
+                Available 24/7 for support
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom */}
+        <div className="mt-8 border-t border-gray-200 pt-8 flex flex-col items-center justify-between gap-4 md:flex-row">
+          <p className="text-sm text-gray-600">
+            © {currentYear} FreelanceHub. All rights reserved.
+          </p>
+          <div className="flex gap-6 text-sm">
+            <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
+              Privacy Policy
+            </a>
+            <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
+              Terms of Service
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
 
 export default Footer;
